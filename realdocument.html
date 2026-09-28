@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Onfon — Leave System</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="stylesheet" href="realdocument.css">
+</head>
+<body>
+
+<div class="overlay" id="auth-overlay">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-dot"></div>
+      <span class="auth-logo-name">Onfon</span>
+      <span class="auth-tagline">Leave Management</span>
+    </div>
+    <h2 class="auth-heading" id="auth-heading">Welcome back</h2>
+    <p class="auth-sub" id="auth-sub">Sign in to manage your leave requests.</p>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('login')">Sign in</button>
+      <button class="auth-tab"        onclick="switchAuthTab('signup')">Create account</button>
+    </div>
+    <div class="auth-msg" id="auth-msg"></div>
+    <!-- LOGIN -->
+    <div id="login-form">
+      <div class="auth-field">
+        <label>Phone Number</label>
+        <input type="tel" id="login-phone" placeholder="e.g. 0712345678" autocomplete="username">
+      </div>
+      <div class="auth-field">
+        <label>Password</label>
+        <input type="password" id="login-pass" placeholder="Enter your password" autocomplete="current-password">
+      </div>
+      <button class="btn btn-primary btn-full" id="login-btn" onclick="doSignIn()">Sign in →</button>
+      <div class="auth-extra-row">
+        <label class="remember-me"><input type="checkbox" id="remember-me"> Remember Me</label>
+        <a href="#" class="forgot-link">Forgot Password?</a>
+      </div>
+      <p class="auth-powered">Powered by <span class="brand-red">ONFON</span> MOBILE</p>
+    </div>
+
+    <div id="signup-form" style="display:none">
+      <div class="auth-field">
+        <label>Full Name</label>
+        <input type="text" id="signup-name" placeholder="e.g. Amina Wanjiku">
+      </div>
+      <div class="form-row">
+        <div class="auth-field">
+          <label>Phone Number</label>
+          <input type="tel" id="signup-phone" placeholder="0712345678">
+        </div>
+        <div class="auth-field">
+          <label>Department</label>
+          <select id="signup-dept">
+            <option value="">Select dept.</option>
+            <option value="Engineering">CCR</option>
+            <option value="salesHR">Risk</option>
+            <option value="finance">Finance</option>
+            <option value="operations">IT</option>
+          </select>
+        </div>
+      </div>
+      <div class="auth-field">
+        <label>Password</label>
+        <input type="password" id="signup-pass" placeholder="Min. 6 characters" autocomplete="new-password">
+      </div>
+      <button class="btn btn-primary btn-full" id="signup-btn" onclick="doSignUp()">Create account →</button>
+    </div>
+  </div>
+</div>
+
+
+<nav>
+  <div class="nav-brand"><div class="nav-dot"></div>Onfon</div>
+  <div class="nav-right">
+    <span class="nav-role" id="nav-role"></span>
+    <span class="nav-user" id="nav-user"></span>
+    <button class="btn btn-ghost btn-sm" id="signout-btn" style="display:none" onclick="doSignOut()">Sign out</button>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="page-wrap" id="main-wrap" style="display:none">
+
+  <!-- EMPLOYEE VIEW -->
+  <div id="employee-view" class="section">
+    <div class="page-header">
+      <h1 id="emp-greeting">Good morning</h1>
+      <p>Request leave, check your balance, and track applications.</p>
+    </div>
+    <div class="balance-row" id="balance-row">
+      <div class="balance-item"><div class="balance-num" id="bal-annual">—</div><div class="balance-label">Annual Leave</div><div class="balance-sub">days remaining</div></div>
+      <div class="balance-item"><div class="balance-num" id="bal-sick">—</div><div class="balance-label">Sick Leave</div><div class="balance-sub">days remaining</div></div>
+      <div class="balance-item"><div class="balance-num" id="bal-emergency">—</div><div class="balance-label">Emergency</div><div class="balance-sub">days remaining</div></div>
+      <div class="balance-item"><div class="balance-num" id="bal-used">—</div><div class="balance-label">Used This Year</div><div class="balance-sub">total days taken</div></div>
+    </div>
+    <div class="view-tabs">
+      <button class="view-tab active" onclick="switchEmpTab('request')">Request Leave</button>
+      <button class="view-tab"        onclick="switchEmpTab('history')">My History</button>
+      <button class="view-tab"        onclick="switchEmpTab('calendar')">Team Calendar</button>
+    </div>
+    <div id="emp-request" class="emp-tab-content">
+      <div class="card">
+        <div class="card-title">New Leave Request</div>
+        <div class="form-row">
+          <div class="field">
+            <label>Leave Type</label>
+            <select id="leave-type">
+              <option value="">Select type</option>
+              <option value="Annual">Annual Leave</option>
+              <option value="Sick">Sick Leave</option>
+              <option value="Emergency">Emergency Leave</option>
+              <option value="Maternity">Maternity Leave</option>
+              <option value="Paternity">Paternity Leave</option>
+              <option value="Unpaid">Unpaid Leave</option>
+              <option value="Compassionate state relationship">Compassionate state relationship</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Handover To</label>
+            <select id="handover-to"><option value="">Select colleague</option></select>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="field"><label>Start Date</label><input type="date" id="leave-start"></div>
+          <div class="field"><label>End Date</label><input type="date" id="leave-end"></div>
+        </div>
+        <div class="field">
+          <label>Reason / Notes <span style="color:var(--text-3);font-weight:400">(optional)</span></label>
+          <textarea id="leave-reason" rows="3" placeholder="Provide any details that may help the approver…"></textarea>
+        </div>
+        <div class="field">
+          <label>Supporting Document <span style="color:var(--danger)">*</span></label>
+          <input type="file" id="leave-document" accept=".doc,.docx">
+          <div class="field-hint">Any supportive document (.doc or .docx or .png or .PDF), max 10MB. Required.</div>
+        </div>
+        <div id="leave-duration-hint" class="field-hint" style="margin-top:-0.75rem; margin-bottom:1rem;"></div>
+        <button class="btn btn-primary" id="submit-leave-btn" onclick="submitLeave()">Submit Request</button>
+        <div class="alert alert-success hidden" id="leave-success" style="margin-top:1rem">
+          <span class="alert-icon">✓</span><span id="leave-success-msg">Your leave request has been submitted.</span>
+        </div>
+        <div class="alert alert-error hidden" id="leave-error" style="margin-top:1rem">
+          <span class="alert-icon">!</span><span id="leave-error-msg">Please fill in all required fields.</span>
+        </div>
+      </div>
+    </div>
+    <div id="emp-history" class="emp-tab-content" style="display:none">
+      <div class="card">
+        <div class="card-title">My Leave History</div>
+        <div class="filter-bar">
+          <button class="filter-btn active" onclick="filterHistory(this,'all')">All</button>
+          <button class="filter-btn" onclick="filterHistory(this,'Pending')">Pending</button>
+          <button class="filter-btn" onclick="filterHistory(this,'Approved')">Approved</button>
+          <button class="filter-btn" onclick="filterHistory(this,'Rejected')">Rejected</button>
+        </div>
+        <div id="history-list"></div>
+      </div>
+    </div>
+    <div id="emp-calendar" class="emp-tab-content" style="display:none">
+      <div class="card">
+        <div class="card-title">Team Leave Calendar</div>
+        <div class="cal-header-row">
+          <div class="cal-month" id="cal-month-label"></div>
+          <div class="cal-nav-btns">
+            <button class="cal-nav-btn" onclick="changeMonth(-1)">‹</button>
+            <button class="cal-nav-btn" onclick="changeMonth(1)">›</button>
+          </div>
+        </div>
+        <div class="cal-days-header">
+          <div class="cal-day-name">Mo</div><div class="cal-day-name">Tu</div><div class="cal-day-name">We</div>
+          <div class="cal-day-name">Th</div><div class="cal-day-name">Fr</div><div class="cal-day-name">Sa</div><div class="cal-day-name">Su</div>
+        </div>
+        <div class="cal-grid" id="cal-grid"></div>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-swatch" style="background:var(--accent-light);border:1px solid #C8DCAA"></div>Available</div>
+          <div class="legend-item"><div class="legend-swatch" style="background:var(--danger-light);border:1px solid #EAC0C0"></div>On Leave</div>
+          <div class="legend-item"><div class="legend-swatch" style="background:var(--amber-light);border:1px solid #F0D89A"></div>Pending</div>
+          <div class="legend-item"><div class="legend-swatch" style="background:var(--surface2);border:1px solid var(--border)"></div>Weekend</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADMIN VIEW -->
+  <div id="admin-view" class="section">
+    <div class="page-header">
+      <h1>Admin Dashboard</h1>
+      <p>Review requests, manage team leave, and track balances.</p>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-num" id="stat-pending">—</div><div class="stat-label">Pending Requests</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-approved">—</div><div class="stat-label">Approved This Month</div></div>
+      <div class="stat-card"><div class="stat-num" id="stat-on-leave">—</div><div class="stat-label">On Leave Today</div></div>
+    </div>
+    <div class="view-tabs">
+      <button class="view-tab active" onclick="switchAdminTab('requests')">Requests</button>
+      <button class="view-tab"        onclick="switchAdminTab('calendar')">Calendar</button>
+      <button class="view-tab"        onclick="switchAdminTab('team')">Team</button>
+    </div>
+    <div id="admin-requests" class="admin-tab-content">
+      <div class="card">
+        <div class="card-title">Leave Requests</div>
+        <div class="filter-bar">
+          <button class="filter-btn active" onclick="filterRequests(this,'all')">All</button>
+          <button class="filter-btn" onclick="filterRequests(this,'Pending')">Pending</button>
+          <button class="filter-btn" onclick="filterRequests(this,'Approved')">Approved</button>
+          <button class="filter-btn" onclick="filterRequests(this,'Rejected')">Rejected</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Employee</th><th>Type</th><th>Dates</th><th>Days</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="requests-tbody"></tbody>
+          </table>
+        </div>
+        <div class="empty-state hidden" id="requests-empty">
+          <span class="empty-icon">📋</span><strong>No requests here</strong>
+        </div>
+      </div>
+    </div>
+    <div id="admin-calendar" class="admin-tab-content" style="display:none">
+      <div class="card">
+        <div class="card-title">Team Leave Calendar</div>
+        <div class="cal-header-row">
+          <div class="cal-month" id="admin-cal-month-label"></div>
+          <div class="cal-nav-btns">
+            <button class="cal-nav-btn" onclick="changeAdminMonth(-1)">‹</button>
+            <button class="cal-nav-btn" onclick="changeAdminMonth(1)">›</button>
+          </div>
+        </div>
+        <div class="cal-days-header">
+          <div class="cal-day-name">Mo</div><div class="cal-day-name">Tu</div><div class="cal-day-name">We</div>
+          <div class="cal-day-name">Th</div><div class="cal-day-name">Fr</div><div class="cal-day-name">Sa</div><div class="cal-day-name">Su</div>
+        </div>
+        <div class="cal-grid" id="admin-cal-grid"></div>
+        <div class="legend">
+          <div class="legend-item"><div class="legend-swatch" style="background:var(--accent-light);border:1px solid #C8DCAA"></div>Available</div>
+          <div class="legend-item"><div class="legend-swatch" style="background:var(--danger-light);border:1px solid #EAC0C0"></div>On Leave</div>
+          <div class="legend-item"><div class="legend-swatch" style="background:var(--amber-light);border:1px solid #F0D89A"></div>Pending</div>
+        </div>
+      </div>
+    </div>
+    <div id="admin-team" class="admin-tab-content" style="display:none">
+      <div class="card">
+        <div class="card-title">Team Balances</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Employee</th><th>Department</th><th>Annual Left</th><th>Sick Left</th><th>Used (Approved)</th><th>Role</th></tr></thead>
+            <tbody id="team-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HR VIEW -->
+  <div id="hr-view" class="section">
+    <div class="page-header">
+      <h1>HR Dashboard</h1>
+      <p>Company-wide leave overview across all departments.</p>
+    </div>
+    <div id="hr-dept-cards"></div>
+    <div class="view-tabs">
+      <button class="view-tab active" onclick="switchHRTab('overview')">Overview</button>
+      <button class="view-tab"        onclick="switchHRTab('history')">All Requests</button>
+    </div>
+    <div id="hr-overview" class="hr-tab-content">
+      <div class="card">
+        <div class="card-title">Department Summary</div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Department</th><th>Headcount</th><th>On Leave Today</th><th>Pending Requests</th><th>Approved This Month</th></tr></thead>
+            <tbody id="hr-dept-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    <div id="hr-history" class="hr-tab-content" style="display:none">
+      <div class="card">
+        <div class="card-title">All Leave Requests</div>
+        <div class="filter-bar" id="hr-dept-filter"></div>
+        <div class="filter-bar" id="hr-status-filter">
+          <button class="filter-btn active" onclick="filterHRStatus(this,'all')">All</button>
+          <button class="filter-btn" onclick="filterHRStatus(this,'Pending')">Pending</button>
+          <button class="filter-btn" onclick="filterHRStatus(this,'Approved')">Approved</button>
+          <button class="filter-btn" onclick="filterHRStatus(this,'Rejected')">Rejected</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Employee</th><th>Department</th><th>Type</th><th>Dates</th><th>Days</th><th>Status</th></tr></thead>
+            <tbody id="hr-requests-tbody"></tbody>
+          </table>
+        </div>
+        <div class="empty-state hidden" id="hr-requests-empty">
+          <span class="empty-icon">📋</span><strong>No requests here</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- REJECT / DENY MODAL -->
+<div class="overlay hidden" id="denyReasonModal">
+  <div class="auth-card" style="max-width:400px">
+    <div class="auth-heading" style="font-size:1.2rem">Reject Request</div>
+    <p class="auth-sub">Provide a reason. The employee will see this.</p>
+    <div class="field">
+      <textarea id="denyReasonInput" rows="3" placeholder="e.g. Insufficient staffing on requested dates"></textarea>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeDenyModal()">Cancel</button>
+      <button class="btn btn-primary" id="confirmDenyBtn" style="flex:1" onclick="submitDenial()">Confirm Reject</button>
+    </div>
+  </div>
+</div>
+
+<footer>Efficient leave management — <strong>Onfon</strong> &copy; 2025</footer>
+
+<script src="realdocument.js"></script>
+</body>
+</html>

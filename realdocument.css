@@ -1,0 +1,214 @@
+:root{
+  --surface:#ffffff;
+  --text-1:#212529;
+  --text-2:#495057;
+  --text-3:#868e96;
+  --border:#ced4da;
+
+  --accent:#ff0000;
+  --accent-hover:#ff1010;
+  --accent-light:#eaf3ff;
+
+  --danger:#dc3545;
+  --danger-light:#f8d7da;
+
+  --success:#28a745;
+  --success-light:#e6f6ea;
+
+  --amber:#e0a800;
+  --amber-light:#fff3cd;
+
+  --surface2:#f4f4f4;
+  --radius:10px;
+  --shadow:0 4px 8px rgba(0,0,0,0.1);
+  accent-color: var(--accent);
+}
+
+*{ box-sizing:border-box; }
+body{ margin:0; background:#fbe4e7; font-family:'DM Sans', sans-serif; color:var(--text-1); }
+.hidden{ display:none !important; }
+
+/* ---------- Section switching (was missing — this is what actually
+   makes only one of employee/admin/hr view show at a time) ---------- */
+.section{ display:none; }
+.section.active{ display:block; }
+
+/* ---------- Auth overlay / card ---------- */
+.overlay{
+  position:fixed; inset:0;
+  background-color: transparent;
+  display:flex; align-items:center; justify-content:center;
+  z-index:100;
+}
+.auth-card{
+  background-color: var(--surface);
+  width:100%;
+  max-width:400px;
+  border-radius:24px;
+  padding:40px 32px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+.auth-logo{ display:flex; align-items:center; justify-content:center; gap:8px; margin:0 auto 20px; }
+.auth-logo-dot{ width:12px; height:12px; border-radius:50%; background:var(--accent); }
+.auth-logo-name{ font-family:'DM Serif Display', serif; font-size:1.4em; color:var(--accent); font-weight:700; }
+.auth-tagline{ color:var(--text-3); font-size:0.85em; }
+
+.auth-heading{ font-size:1.4em; font-weight:bold; color:var(--text-1); text-align:center; margin:0 0 4px; }
+.auth-sub{ text-align:center; color:var(--text-3); margin-bottom:20px; font-size:0.9em; }
+
+.auth-msg{ display:none; text-align:center; margin-bottom:15px; font-size:0.9em; padding:8px; border-radius:8px; }
+.auth-msg.show{ display:block; }
+.auth-msg.error{ color:#7a1f27; background:var(--danger-light); }
+.auth-msg.success{ color:#1e5e2f; background:var(--success-light); }
+
+.auth-tabs{ display:flex; margin-bottom:20px; border-bottom:1px solid var(--border); }
+.auth-tab{ flex:1; padding:10px; border:none; background:none; cursor:pointer; color:var(--text-3); font-weight:600; border-bottom:2px solid transparent; }
+.auth-tab.active{ color:var(--accent); border-bottom-color:var(--accent); }
+
+.auth-field{ margin-bottom:15px; }
+.auth-field label{ display:block; margin-bottom:6px; font-weight:600; font-size:0.85em; color:var(--text-2); }
+.auth-field input, .auth-field select{
+  width:100%; padding:16px 18px; border-radius:12px; border:1px solid #e5e5e5; font-size:0.95em; font-family:inherit;
+}
+.auth-field input::placeholder{ color:#9aa0a6; }
+.auth-field input:focus, .auth-field select:focus{ border-color:var(--accent); outline:none; }
+
+.form-row{ display:flex; gap:10px; }
+.form-row .auth-field{ flex:1; }
+
+/* Remember me / forgot password row */
+.auth-extra-row{ display:flex; justify-content:space-between; align-items:center; margin-top:14px; font-size:0.85em; }
+.remember-me{ display:flex; align-items:center; gap:6px; color:#333; cursor:pointer; }
+.forgot-link{ color:#333; text-decoration:underline; }
+.auth-powered{ text-align:center; font-size:0.8em; color:var(--text-3); margin-top:24px; }
+.auth-powered .brand-red{ color:var(--accent); font-weight:700; }
+
+/* ---------- Buttons ---------- */
+.btn{ padding:10px 18px; border:none; border-radius:6px; font-weight:600; cursor:pointer; transition:background-color .2s ease, opacity .2s ease; }
+.btn-primary{ background:var(--accent); color:#fff; }
+.btn-primary:hover{ background:var(--accent-hover); }
+.btn-ghost{ background:transparent; color:var(--text-2); border:1px solid var(--border); }
+.btn-ghost:hover{ background:#f1f1f1; }
+.btn-full{ width:100%; }
+.btn-sm{ padding:6px 12px; font-size:0.85em; }
+.btn-approve{ background:var(--success); color:#fff; }
+.btn-approve:hover{ background:#218a38; }
+.btn-reject{ background:var(--danger); color:#fff; }
+.btn-reject:hover{ background:#c62233; }
+.auth-card .btn-primary{ padding:16px; border-radius:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; box-shadow:0 6px 14px rgba(255,0,0,0.35); }
+
+/* Spinner — used by login/signup/submit buttons while loading */
+.spinner{
+  display:inline-block; width:14px; height:14px; border:2px solid rgba(255,255,255,0.5);
+  border-top-color:#fff; border-radius:50%; animation:spin .7s linear infinite; margin-right:6px; vertical-align:-2px;
+}
+@keyframes spin{ to{ transform:rotate(360deg); } }
+
+/* Toast notifications */
+.toast{
+  position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+  background:#212529; color:#fff; padding:12px 20px; border-radius:8px;
+  font-size:0.9em; box-shadow:0 6px 18px rgba(0,0,0,0.2); z-index:999;
+  animation: toast-in .25s ease;
+}
+.toast.out{ animation: toast-out .25s ease forwards; }
+@keyframes toast-in{ from{ opacity:0; transform:translate(-50%,10px);} to{ opacity:1; transform:translate(-50%,0);} }
+@keyframes toast-out{ to{ opacity:0; transform:translate(-50%,10px);} }
+
+/* ---------- Alerts ---------- */
+.alert{ display:flex; align-items:center; gap:8px; padding:10px 14px; border-radius:6px; font-size:0.9em; }
+.alert-success{ background:var(--success-light); color:#1e5e2f; }
+.alert-error{ background:var(--danger-light); color:#7a1f27; }
+.field-hint{ font-size:0.8em; color:var(--text-3); margin-top:4px; }
+
+/* ---------- Nav ---------- */
+nav{ display:flex; align-items:center; justify-content:space-between; padding:14px 24px; background:var(--surface); box-shadow:var(--shadow); }
+.nav-brand{ display:flex; align-items:center; gap:8px; font-weight:700; }
+.nav-dot{ width:10px; height:10px; border-radius:50%; background:var(--accent); }
+.nav-right{ display:flex; align-items:center; gap:12px; }
+.nav-role, .nav-user{ display:none; }
+.nav-role.show, .nav-user.show{ display:inline; }
+.nav-role{ font-size:0.8em; color:var(--text-3); text-transform:uppercase; }
+.nav-user{ font-weight:600; }
+
+/* ---------- Page layout ---------- */
+.page-wrap{ max-width:1100px; margin:0 auto; padding:24px; }
+.page-header{ margin-bottom:20px; }
+.page-header h1{ margin:0 0 4px; }
+.page-header p{ color:var(--text-3); margin:0; }
+
+/* ---------- Balances / stats ---------- */
+.balance-row, .stats-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px; }
+.balance-item, .stat-card{ background:var(--surface); border-radius:var(--radius); box-shadow:var(--shadow); padding:18px; text-align:center; }
+.balance-num, .stat-num{ font-size:1.8em; font-weight:700; color:var(--accent); }
+.balance-label, .stat-label{ font-weight:600; margin-top:4px; }
+.balance-sub{ font-size:0.8em; color:var(--text-3); }
+
+/* ---------- Tabs ---------- */
+.view-tabs{ display:flex; gap:8px; margin-bottom:20px; border-bottom:1px solid var(--border); }
+.view-tab{ padding:10px 16px; border:none; background:none; cursor:pointer; font-weight:600; color:var(--text-3); border-bottom:2px solid transparent; }
+.view-tab.active{ color:var(--accent); border-bottom-color:var(--accent); }
+
+/* ---------- Cards / forms ---------- */
+.card{ background:var(--surface); border-radius:var(--radius); box-shadow:var(--shadow); padding:20px; margin-bottom:20px; }
+.card-title{ font-size:1.15em; font-weight:700; margin-bottom:14px; }
+.field{ flex:1; margin-bottom:15px; }
+.field label{ display:block; margin-bottom:5px; font-weight:600; color:var(--text-2); }
+.field input, .field select, .field textarea{ width:100%; padding:10px; border:1px solid var(--border); border-radius:5px; font-family:inherit; }
+
+/* ---------- Filters ---------- */
+.filter-bar{ display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap; }
+.filter-btn{ padding:6px 14px; border:1px solid var(--border); border-radius:20px; background:var(--surface); cursor:pointer; font-size:0.85em; }
+.filter-btn.active{ background:var(--accent); border-color:var(--accent); color:#fff; }
+
+/* ---------- Calendar ---------- */
+.cal-header-row{ display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
+.cal-month{ font-size:1.1em; font-weight:700; }
+.cal-nav-btns{ display:flex; gap:6px; }
+.cal-nav-btn{ width:30px; height:30px; border:1px solid var(--border); border-radius:6px; background:var(--surface); cursor:pointer; font-size:1.1em; }
+.cal-days-header{ display:grid; grid-template-columns:repeat(7,1fr); text-align:center; margin-bottom:6px; }
+.cal-day-name{ font-size:0.8em; font-weight:600; color:var(--text-3); }
+.cal-grid{ display:grid; grid-template-columns:repeat(7,1fr); gap:6px; }
+.day-cell{ aspect-ratio:1; display:flex; align-items:center; justify-content:center; border-radius:8px; font-size:0.85em; background:var(--surface2); }
+.day-cell.empty{ background:transparent; }
+.day-cell.available{ background:var(--accent-light); }
+.day-cell.booked{ background:var(--danger-light); }
+.day-cell.pending-day{ background:var(--amber-light); }
+.day-cell.weekend{ background:var(--surface2); color:var(--text-3); }
+.day-cell.past{ color:var(--text-3); }
+.day-cell.today-cell{ outline:2px solid var(--accent); }
+.legend{ display:flex; gap:16px; margin-top:14px; flex-wrap:wrap; }
+.legend-item{ display:flex; align-items:center; gap:6px; font-size:0.8em; color:var(--text-2); }
+.legend-swatch{ width:14px; height:14px; border-radius:4px; }
+
+/* ---------- Tables ---------- */
+.table-wrap{ overflow-x:auto; }
+table{ width:100%; border-collapse:collapse; }
+th, td{ text-align:left; padding:10px; border-bottom:1px solid var(--border); }
+th{ font-size:0.8em; text-transform:uppercase; color:var(--text-3); }
+.td-actions{ display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+
+.empty-state{ text-align:center; padding:40px 0; color:var(--text-3); }
+.empty-icon{ display:block; font-size:2em; margin-bottom:8px; }
+
+/* ---------- Badges (leave request status) ---------- */
+.badge{ padding:3px 10px; border-radius:20px; font-size:0.75em; font-weight:600; }
+.badge-pending{ background:var(--amber-light); color:#8a6100; }
+.badge-approved{ background:var(--success-light); color:#1e5e2f; }
+.badge-rejected{ background:var(--danger-light); color:#7a1f27; }
+
+/* ---------- Leave history list ---------- */
+.history-item{ display:flex; justify-content:space-between; align-items:center; padding:14px 0; border-bottom:1px solid var(--border); gap:12px; }
+.history-item:last-child{ border-bottom:none; }
+.history-type{ font-weight:600; }
+.history-dates{ font-size:0.85em; color:var(--text-3); margin-top:2px; }
+.history-days{ font-weight:700; color:var(--accent); }
+
+/* ---------- HR department cards ---------- */
+.dept-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:16px; margin-bottom:24px; }
+.dept-card{ background:var(--surface); border-radius:var(--radius); box-shadow:var(--shadow); padding:16px; }
+.dept-card-title{ font-weight:700; margin-bottom:10px; }
+.dept-card-row{ display:flex; justify-content:space-between; font-size:0.85em; color:var(--text-2); margin-bottom:4px; }
+.dept-card-row span{ font-weight:700; color:var(--accent); margin-right:6px; }
+
+footer{ text-align:center; padding:20px; color:var(--text-3); font-size:0.85em; }
