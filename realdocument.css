@@ -25,19 +25,23 @@
 }
 
 *{ box-sizing:border-box; }
-body{ margin:0; background:#fbe4e7; font-family:'DM Sans', sans-serif; color:var(--text-1); }
+body{ margin:0; background:#fbe4e7; font-family: Roboto, Helvetica, Arial, sans-serif;font-weight: 400; line-height: 1.5; color:var(--text-1); }
 .hidden{ display:none !important; }
 
 /* ---------- Section switching (was missing — this is what actually
    makes only one of employee/admin/hr view show at a time) ---------- */
 .section{ display:none; }
 .section.active{ display:block; }
+.auth-logo-img{ height:110px; width:auto; max-width:100%; object-fit:contain; }
+.brand{height:30px; width:auto; max-width:100%; object-fit:contain; }
+.brand-img{ height:30px; width:auto; max-width:100%; object-fit:contain; }
 
 /* ---------- Auth overlay / card ---------- */
 .overlay{
   position:fixed; inset:0;
   background-color: transparent;
   display:flex; align-items:center; justify-content:center;
+  
   z-index:100;
 }
 .auth-card{
@@ -50,11 +54,9 @@ body{ margin:0; background:#fbe4e7; font-family:'DM Sans', sans-serif; color:var
 }
 .auth-logo{ display:flex; align-items:center; justify-content:center; gap:8px; margin:0 auto 20px; }
 .auth-logo-dot{ width:12px; height:12px; border-radius:50%; background:var(--accent); }
-.auth-logo-name{ font-family:'DM Serif Display', serif; font-size:1.4em; color:var(--accent); font-weight:700; }
-.auth-tagline{ color:var(--text-3); font-size:0.85em; }
+.auth-logo-name{ font-family:'DM Serif Display', serif; font-size:1.4em; color:var(--accent); font-weight:700; } 
 
 .auth-heading{ font-size:1.4em; font-weight:bold; color:var(--text-1); text-align:center; margin:0 0 4px; }
-.auth-sub{ text-align:center; color:var(--text-3); margin-bottom:20px; font-size:0.9em; }
 
 .auth-msg{ display:none; text-align:center; margin-bottom:15px; font-size:0.9em; padding:8px; border-radius:8px; }
 .auth-msg.show{ display:block; }

@@ -13,12 +13,9 @@
 <div class="overlay" id="auth-overlay">
   <div class="auth-card">
     <div class="auth-logo">
-      <div class="auth-logo-dot"></div>
-      <span class="auth-logo-name">Onfon</span>
-      <span class="auth-tagline">Leave Management</span>
+      <img src="image/poralpic.png" alt="Onfon Mobile" class="auth-logo-img">
     </div>
     <h2 class="auth-heading" id="auth-heading">Welcome back</h2>
-    <p class="auth-sub" id="auth-sub">Sign in to manage your leave requests.</p>
     <div class="auth-tabs">
       <button class="auth-tab active" onclick="switchAuthTab('login')">Sign in</button>
       <button class="auth-tab"        onclick="switchAuthTab('signup')">Create account</button>
@@ -45,7 +42,7 @@
     <div id="signup-form" style="display:none">
       <div class="auth-field">
         <label>Full Name</label>
-        <input type="text" id="signup-name" placeholder="e.g. Amina Wanjiku">
+        <input type="text" id="signup-name" placeholder="name...">
       </div>
       <div class="form-row">
         <div class="auth-field">
@@ -65,7 +62,7 @@
       </div>
       <div class="auth-field">
         <label>Password</label>
-        <input type="password" id="signup-pass" placeholder="Min. 6 characters" autocomplete="new-password">
+        <input type="password" id="signup-pass" placeholder="password" autocomplete="new-password">
       </div>
       <button class="btn btn-primary btn-full" id="signup-btn" onclick="doSignUp()">Create account →</button>
     </div>
@@ -74,7 +71,9 @@
 
 
 <nav>
-  <div class="nav-brand"><div class="nav-dot"></div>Onfon</div>
+  <div class="brand">
+  <img src="image/poralpic.png" alt="Onfon Mobile" class="brand-img">
+  </div>
   <div class="nav-right">
     <span class="nav-role" id="nav-role"></span>
     <span class="nav-user" id="nav-user"></span>
@@ -188,7 +187,6 @@
   <div id="admin-view" class="section">
     <div class="page-header">
       <h1>Admin Dashboard</h1>
-      <p>Review requests, manage team leave, and track balances.</p>
     </div>
     <div class="stats-grid">
       <div class="stat-card"><div class="stat-num" id="stat-pending">—</div><div class="stat-label">Pending Requests</div></div>
@@ -259,7 +257,6 @@
   <div id="hr-view" class="section">
     <div class="page-header">
       <h1>HR Dashboard</h1>
-      <p>Company-wide leave overview across all departments.</p>
     </div>
     <div id="hr-dept-cards"></div>
     <div class="view-tabs">
@@ -317,7 +314,7 @@
   </div>
 </div>
 
-<footer>Efficient leave management — <strong>Onfon</strong> &copy; 2025</footer>
+<footer><p class="auth-powered">Powered by<b><span class="brand-red">ONFON</span></b> MOBILE</p></footer>
 
 <script src="realdocument.js"></script>
 </body>
