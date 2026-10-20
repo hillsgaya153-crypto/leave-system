@@ -1,0 +1,4 @@
+window.__ONFON_CONFIG__ = {
+  supabaseUrl: 'https://your-project-ref.supabase.co',
+  supabaseAnonKey: 'replace-with-your-public-anon-key'
+};

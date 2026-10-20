@@ -1,12 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Onfon — Leave System</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link rel="stylesheet" href="realdocument.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Onfon — Leave System</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
+  <link rel="stylesheet" href="realdocument.css">
 </head>
 <body>
 
@@ -21,7 +22,7 @@
     <p class="auth-sub" id="auth-sub">Sign in to manage your leave requests.</p>
     <div class="auth-tabs">
       <button class="auth-tab active" onclick="switchAuthTab('login')">Sign in</button>
-      <button class="auth-tab"        onclick="switchAuthTab('signup')">Create account</button>
+      <button class="auth-tab" onclick="switchAuthTab('signup')">Create account</button>
     </div>
     <div class="auth-msg" id="auth-msg"></div>
     <!-- LOGIN -->
@@ -72,7 +73,6 @@
   </div>
 </div>
 
-
 <nav>
   <div class="nav-brand"><div class="nav-dot"></div>Onfon</div>
   <div class="nav-right">
@@ -82,10 +82,8 @@
   </div>
 </nav>
 
-<!-- MAIN -->
 <div class="page-wrap" id="main-wrap" style="display:none">
 
-  <!-- EMPLOYEE VIEW -->
   <div id="employee-view" class="section">
     <div class="page-header">
       <h1 id="emp-greeting">Good morning</h1>
@@ -99,8 +97,8 @@
     </div>
     <div class="view-tabs">
       <button class="view-tab active" onclick="switchEmpTab('request')">Request Leave</button>
-      <button class="view-tab"        onclick="switchEmpTab('history')">My History</button>
-      <button class="view-tab"        onclick="switchEmpTab('calendar')">Team Calendar</button>
+      <button class="view-tab" onclick="switchEmpTab('history')">My History</button>
+      <button class="view-tab" onclick="switchEmpTab('calendar')">Team Calendar</button>
     </div>
     <div id="emp-request" class="emp-tab-content">
       <div class="card">
@@ -134,7 +132,7 @@
         </div>
         <div class="field">
           <label>Supporting Document <span style="color:var(--danger)">*</span></label>
-          <input type="file" id="leave-document" accept=".doc,.docx">
+          <input type="file" id="leave-document" accept=".doc,.docx,.pdf,.png">
           <div class="field-hint">Any supportive document (.doc or .docx or .png or .PDF), max 10MB. Required.</div>
         </div>
         <div id="leave-duration-hint" class="field-hint" style="margin-top:-0.75rem; margin-bottom:1rem;"></div>
@@ -184,7 +182,6 @@
     </div>
   </div>
 
-  <!-- ADMIN VIEW -->
   <div id="admin-view" class="section">
     <div class="page-header">
       <h1>Admin Dashboard</h1>
@@ -197,8 +194,8 @@
     </div>
     <div class="view-tabs">
       <button class="view-tab active" onclick="switchAdminTab('requests')">Requests</button>
-      <button class="view-tab"        onclick="switchAdminTab('calendar')">Calendar</button>
-      <button class="view-tab"        onclick="switchAdminTab('team')">Team</button>
+      <button class="view-tab" onclick="switchAdminTab('calendar')">Calendar</button>
+      <button class="view-tab" onclick="switchAdminTab('team')">Team</button>
     </div>
     <div id="admin-requests" class="admin-tab-content">
       <div class="card">
@@ -255,7 +252,6 @@
     </div>
   </div>
 
-  <!-- HR VIEW -->
   <div id="hr-view" class="section">
     <div class="page-header">
       <h1>HR Dashboard</h1>
@@ -264,7 +260,7 @@
     <div id="hr-dept-cards"></div>
     <div class="view-tabs">
       <button class="view-tab active" onclick="switchHRTab('overview')">Overview</button>
-      <button class="view-tab"        onclick="switchHRTab('history')">All Requests</button>
+      <button class="view-tab" onclick="switchHRTab('history')">All Requests</button>
     </div>
     <div id="hr-overview" class="hr-tab-content">
       <div class="card">
@@ -302,7 +298,6 @@
 
 </div>
 
-<!-- REJECT / DENY MODAL -->
 <div class="overlay hidden" id="denyReasonModal">
   <div class="auth-card" style="max-width:400px">
     <div class="auth-heading" style="font-size:1.2rem">Reject Request</div>

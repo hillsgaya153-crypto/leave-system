@@ -1,12 +1,48 @@
-const SUPABASE_URL  = 'https://wbcqdoypnewadcdfegrh.supabase.co';
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndiY3Fkb3lwbmV3YWRjZGZlZ3JoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA2ODgsImV4cCI6MjA5NTQzNjY4OH0.ozFqzeH-7557OLb7vuYl9ibacuIctJFFWCnvYAK6JmM';
+const appConfig = typeof window !== 'undefined' ? (window.__ONFON_CONFIG__ || {}) : {};
+const SUPABASE_URL  = appConfig.supabaseUrl || '';
+const SUPABASE_ANON = appConfig.supabaseAnonKey || '';
 
 const { createClient } = supabase;
-const db = createClient(SUPABASE_URL, SUPABASE_ANON);
+const db = SUPABASE_URL && SUPABASE_ANON ? createClient(SUPABASE_URL, SUPABASE_ANON) : null;
 
 const DEPT_LABELS = { Engineering: 'CCR', salesHR: 'Risk', finance: 'Finance', operations: 'IT' };
 function deptLabel(d) { return DEPT_LABELS[d] || d || '—'; }
 function roleLabel(r) { return { employee: 'Employee', team_lead: 'Team Lead', hr: 'HR', admin: 'Admin' }[r] || r; }
+
+function ensureSupabaseConfig() {
+  if (!db) {
+    const message = 'Application is not configured. Copy config.js.example to config.js and add your Supabase URL + anon key.';
+    if (typeof document !== 'undefined') {
+      const authMsg = document.getElementById('auth-msg');
+      if (authMsg) {
+        authMsg.textContent = message;
+        authMsg.className = 'auth-msg show error';
+      }
+    }
+    throw new Error(message);
+  }
+}
+
+function requireRole(requiredRoles, actionName) {
+  if (!currentProfile) {
+    showToast(`${actionName} requires a signed-in user.`);
+    return false;
+  }
+
+  if (!requiredRoles.includes(currentProfile.role)) {
+    showToast(`${actionName} requires ${requiredRoles.join(' or ')} access.`);
+    return false;
+  }
+
+  return true;
+}
+
+function canManageLeaveRequest(request) {
+  if (!request || !currentProfile) return false;
+  if (currentProfile.role === 'admin') return true;
+  if (currentProfile.role === 'team_lead') return request.profiles?.department === currentProfile.department;
+  return false;
+}
 
 let currentUser    = null;
 let currentProfile = null;
@@ -25,12 +61,17 @@ let adminCalYear   = today.getFullYear();
 let adminCalMonth  = today.getMonth();
 
 (async () => {
-  const { data: { session } } = await db.auth.getSession();
-  if (session?.user) await afterLogin(session.user);
-  db.auth.onAuthStateChange(async (event, session) => {
-    if (event === 'SIGNED_IN'  && session?.user && !currentUser) await afterLogin(session.user);
-    if (event === 'SIGNED_OUT') resetUI();
-  });
+  try {
+    ensureSupabaseConfig();
+    const { data: { session } } = await db.auth.getSession();
+    if (session?.user) await afterLogin(session.user);
+    db.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session?.user && !currentUser) await afterLogin(session.user);
+      if (event === 'SIGNED_OUT') resetUI();
+    });
+  } catch (error) {
+    console.error(error);
+  }
 })();
 
 function switchAuthTab(tab) {
@@ -65,6 +106,7 @@ function phoneToEmail(phone) {
 }
 
 async function doSignIn() {
+  ensureSupabaseConfig();
   const phone = document.getElementById('login-phone').value.trim();
   const pass  = document.getElementById('login-pass').value;
   if (!phone || !pass) return showAuthMsg('Phone number and password are required.', 'error');
@@ -81,6 +123,7 @@ async function doSignIn() {
 }
 
 async function doSignUp() {
+  ensureSupabaseConfig();
   const name  = document.getElementById('signup-name').value.trim();
   const phone = document.getElementById('signup-phone').value.trim();
   const dept  = document.getElementById('signup-dept').value;
@@ -106,6 +149,7 @@ async function doSignUp() {
 }
 
 async function doSignOut() {
+  ensureSupabaseConfig();
   await db.auth.signOut();
   showToast('Signed out. See you soon!');
 }
@@ -125,10 +169,10 @@ function resetUI() {
 }
 
 async function afterLogin(user) {
+  ensureSupabaseConfig();
   currentUser = user;
 
-  const { data: profile, error } = await db
-    .from('profiles').select('*').eq('id', user.id).single();
+  const { data: profile, error } = await db.from('profiles').select('*').eq('id', user.id).single();
 
   if (error) {
     const msg = error.code === 'PGRST116'
@@ -182,6 +226,7 @@ async function afterLogin(user) {
 }
 
 async function loadEmployeeData() {
+  ensureSupabaseConfig();
   const { data } = await db
     .from('leave_requests')
     .select('*, profiles!leave_requests_user_id_fkey(full_name)')
@@ -270,6 +315,9 @@ function calcWorkingDays(start, end) {
 
 async function submitLeave() {
   hideAlert('leave-success'); hideAlert('leave-error');
+  ensureSupabaseConfig();
+  if (!currentProfile) return showAlert('leave-error', 'You must be signed in to submit a leave request.');
+
   const type     = document.getElementById('leave-type').value;
   const start    = document.getElementById('leave-start').value;
   const end      = document.getElementById('leave-end').value;
@@ -284,7 +332,7 @@ async function submitLeave() {
   if (end < start) return showAlert('leave-error', 'End date cannot be before start date.');
   if (!file)        return showAlert('leave-error', 'A supporting document is required.');
 
-  const allowedExt = ['.doc', '.docx','.pdf','.png'];
+  const allowedExt = ['.doc', '.docx', '.pdf', '.png'];
   const fileName = file.name.toLowerCase();
   const validExt = allowedExt.some(ext => fileName.endsWith(ext));
   if (!validExt) return showAlert('leave-error', 'Document must be a .doc or .docx file or .PDF or .png');
@@ -309,9 +357,7 @@ async function submitLeave() {
   const fileExt = fileName.substring(fileName.lastIndexOf('.'));
   const filePath = `${currentProfile.id}/${Date.now()}${fileExt}`;
 
-  const { error: uploadError } = await db.storage
-    .from('leave-documents')
-    .upload(filePath, file);
+  const { error: uploadError } = await db.storage.from('leave-documents').upload(filePath, file);
 
   if (uploadError) {
     btn.disabled = false;
@@ -381,6 +427,9 @@ function changeMonth(dir) {
 function renderCalendar() { renderCal('cal-grid', 'cal-month-label', calYear, calMonth); }
 
 async function loadAdminData() {
+  ensureSupabaseConfig();
+  if (!requireRole(['admin', 'team_lead'], 'Opening the admin dashboard')) return;
+
   const [{ data: reqs }, { data: stats }, { data: profiles }] = await Promise.all([
     db.from('leave_requests')
       .select('*, profiles!leave_requests_user_id_fkey(full_name, department)')
@@ -403,6 +452,9 @@ async function loadAdminData() {
 }
 
 async function loadHRData() {
+  ensureSupabaseConfig();
+  if (!requireRole(['hr'], 'Opening the HR dashboard')) return;
+
   const [{ data: reqs }, { data: deptStats }] = await Promise.all([
     db.from('leave_requests')
       .select('*, profiles!leave_requests_user_id_fkey(full_name, department)')
@@ -464,6 +516,7 @@ function filterHRStatus(btn, status) {
 }
 
 function renderHRRequestsTable() {
+  if (!requireRole(['hr'], 'Viewing HR requests')) return;
   let items = [...hrRequests];
   if (hrDeptFilter !== 'all') items = items.filter(r => r.profiles?.department === hrDeptFilter);
   if (hrStatusFilter !== 'all') items = items.filter(r => r.status === hrStatusFilter);
@@ -536,22 +589,26 @@ function renderRequestsTable() {
           <button class="btn btn-reject  btn-sm" onclick="openDenyModal(${r.id})">Reject</button>
         ` : (r.status === 'Rejected' && r.rejection_reason
               ? `<span style="font-size:0.78rem;color:var(--danger)" title="${r.rejection_reason}">Reason: ${r.rejection_reason.slice(0,20)}${r.rejection_reason.length > 20 ? '…' : ''}</span>`
-              : `<span style="font-size:0.8rem;color:var(--text-3)">—</span>`)}
+              : `<span style="font-size:0.8rem;color:var(--text-3)">—</span>`) }
       </td>
     </tr>`).join('');
 }
 
 async function viewDocument(path) {
-  const { data, error } = await db.storage
-    .from('leave-documents')
-    .createSignedUrl(path, 60);
+  ensureSupabaseConfig();
+  const { data, error } = await db.storage.from('leave-documents').createSignedUrl(path, 60);
   if (error) return showToast('Could not open document: ' + error.message);
   window.open(data.signedUrl, '_blank');
 }
 
 async function handleRequest(id) {
+  ensureSupabaseConfig();
   const req = allRequests.find(r => r.id === id);
   if (!req) return;
+  if (!canManageLeaveRequest(req)) {
+    showToast('You are not allowed to approve this request.');
+    return;
+  }
   const btns = document.querySelectorAll(`[onclick*="handleRequest(${id}"]`);
   btns.forEach(b => { b.disabled = true; b.style.opacity = '0.5'; });
   const { error } = await db.rpc('approve_leave', { request_id: id });
@@ -565,6 +622,12 @@ async function handleRequest(id) {
 }
 
 function openDenyModal(requestId) {
+  ensureSupabaseConfig();
+  const req = allRequests.find(r => r.id === requestId);
+  if (!req || !canManageLeaveRequest(req)) {
+    showToast('You are not allowed to reject this request.');
+    return;
+  }
   currentDenyRequestId = requestId;
   document.getElementById('denyReasonInput').value = '';
   document.getElementById('denyReasonModal').classList.remove('hidden');
@@ -576,10 +639,16 @@ function closeDenyModal() {
 }
 
 async function submitDenial() {
+  ensureSupabaseConfig();
   const reason = document.getElementById('denyReasonInput').value.trim();
   if (!reason) return showToast('Reason is required');
 
   const req = allRequests.find(r => r.id === currentDenyRequestId);
+  if (!req || !canManageLeaveRequest(req)) {
+    showToast('You are not allowed to reject this request.');
+    return;
+  }
+
   const btn = document.getElementById('confirmDenyBtn');
   btn.disabled = true;
 
@@ -608,11 +677,11 @@ function renderTeamTable() {
       .reduce((s, r) => s + r.days, 0);
     const roleCell = isAdmin
       ? `<select id="role-sel-${p.id}" class="role-select">
-           ${['employee', 'team_lead', 'hr', 'admin'].map(r =>
-             `<option value="${r}" ${r === p.role ? 'selected' : ''}>${roleLabel(r)}</option>`
-           ).join('')}
-         </select>
-         <button class="btn btn-ghost btn-sm" onclick="updateRole('${p.id}')">Save</button>`
+          ${['employee', 'team_lead', 'hr', 'admin'].map(r =>
+            `<option value="${r}" ${r === p.role ? 'selected' : ''}>${roleLabel(r)}</option>`
+          ).join('')}
+        </select>
+        <button class="btn btn-ghost btn-sm" onclick="updateRole('${p.id}')">Save</button>`
       : roleLabel(p.role);
     return `
       <tr>
@@ -627,6 +696,8 @@ function renderTeamTable() {
 }
 
 async function updateRole(profileId) {
+  ensureSupabaseConfig();
+  if (!requireRole(['admin'], 'Updating roles')) return;
   const sel = document.getElementById(`role-sel-${profileId}`);
   const newRole = sel.value;
   const { error } = await db.from('profiles').update({ role: newRole }).eq('id', profileId);
